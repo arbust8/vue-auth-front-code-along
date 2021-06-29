@@ -24,7 +24,6 @@
           type="password"
           label="Passowrd"
           v-model="password"
-          :rules="[password]"
         ></v-text-field>
         <v-text-field
           type="password"
@@ -36,6 +35,7 @@
           label
           :items="['user', 'master', 'admin']"
           placeholder="Select a role"
+          v-model="role"
           outlined
         ></v-select>
       </v-card-text>
@@ -43,13 +43,15 @@
       <v-divider></v-divider>
 
       <v-card-actions>
-        <v-btn color="success">Signup</v-btn>
+        <v-btn color="success" @click.prevent="submit">Signup</v-btn>
       </v-card-actions>
     </v-card>
   </div>
 </template>
 
 <script>
+import AuthService from '@/services/authService'
+
 export default {
   name: "HelloWorld",
 
@@ -58,6 +60,7 @@ export default {
     email: "",
     password: "",
     confPass: "",
+    role: "",
     formHasErrors: false,
     snackbar: false,
     rules: {
@@ -65,9 +68,9 @@ export default {
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
           value
         ) || "Email doesn't have the right format",
-      password: (value) =>
-        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/.test(value) ||
-        "8 charachters, lowercase and uppercase",
+      // password: (value) =>
+      //   /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/.test(value) ||
+      //   "8 charachters, lowercase and uppercase",
     },
   }),
   computed: {
@@ -93,6 +96,16 @@ export default {
 
       if (!this.formHasErrors) this.signup();
     },
+    signup() {
+      AuthService.signup(this.name, this.email, this.password, this.role)
+        .then(res => {
+          console.log(res)
+          localStorage.setItem('token', res.token)
+          localStorage.setItem('email', res.email)
+          localStorage.setItem('role', res.role)
+        })
+        .catch(err => console.log(err))
+    }
   },
 };
 </script>
